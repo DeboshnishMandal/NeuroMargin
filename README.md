@@ -1,4 +1,4 @@
-# 🧠 NeuroMargin
+# NeuroMargin
 ### Voice-Based Parkinson's Disease Classification Using Acoustic Features and Machine Learning
 
 **Course:** Mathematics for Computing III  
