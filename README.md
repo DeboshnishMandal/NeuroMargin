@@ -1,69 +1,145 @@
-# NeuroMargin — Full Voice Research Project
+# 🧠 NeuroMargin
+### Voice-Based Parkinson's Disease Classification Using Acoustic Features and Machine Learning
 
-A reproducible WAV-based Parkinson's voice research prototype. The project downloads a real, labeled WAV corpus on first run, extracts one consistent acoustic feature vector for both training and inference, trains and evaluates multiple models using participant-disjoint folds, creates graphs, and launches a Streamlit dashboard.
+**Course:** Mathematics for Computing III  
+**Institution:** Amrita Vishwa Vidyapeetham, Bengaluru Campus  
+**Team Members:** Soham and Karen
 
-## One-command start (Windows)
+---
 
-1. Install **64-bit Python 3.13** and ensure `py --list` shows it.
-2. Extract this ZIP.
-3. Double-click `START_NEUROMARGIN.bat`.
+## 1. Project Overview
 
-The first run installs packages, downloads the MDVR-KCL archive (~606 MB), verifies its MD5, extracts the recordings, computes features, trains models, generates graphs and opens the dashboard. It requires internet access and disk space for the archive plus extracted WAVs and features. Later starts reuse the local dataset and trained model.
+NeuroMargin is an experimental voice-based Parkinson's disease research prototype that investigates whether acoustic characteristics of speech can help distinguish recordings from individuals with Parkinson's disease (PD) and healthy controls.
 
-## Dataset
+The system extracts acoustic features from WAV recordings, evaluates multiple machine-learning classifiers, and presents experimental predictions through an interactive Streamlit dashboard.
 
-**MDVR-KCL — Mobile Device Voice Recordings at King's College London**  
-Zenodo record: https://zenodo.org/records/2867216  
-Direct archive: https://zenodo.org/records/2867216/files/26_29_09_2017_KCL.zip?download=1  
-DOI: https://doi.org/10.5281/zenodo.2867216  
-License: CC BY 4.0 (cite the source).
+**Note:** NeuroMargin is an academic research prototype, not a clinically validated diagnostic system.
 
-This corpus includes 37 participants (21 healthy controls, 16 PD) with WAV speech recordings. The project parses labels and participant IDs from filenames and performs grouped validation. This is a small research corpus, not a representative clinical population.
+## 2. Objectives
 
-## Project output
+- Develop a consistent WAV audio preprocessing pipeline.
+- Extract meaningful acoustic features from voice recordings.
+- Compare multiple machine-learning classification algorithms.
+- Evaluate models using participant-disjoint validation.
+- Visualize acoustic characteristics and experimental results.
+- Provide an interactive interface for WAV analysis.
 
-- `models/voice_model.joblib` — trained SVM and feature schema
-- `results/tables/model_comparison.csv` — OOF model metrics
-- `results/tables/extracted_training_features.csv` — computed training features
-- `results/figures/` — class distribution, confusion matrix, ROC, model comparison, PCA, feature importance, CG convergence
-- Streamlit dashboard — upload a WAV and view an experimental binary model output plus extracted features.
+## 3. Datasets
 
-## Method
+### MDVR-KCL Dataset
+- Source: https://doi.org/10.5281/zenodo.2867216
+- Contains voice recordings associated with Parkinson's disease and healthy controls.
+- Used for WAV-based feature extraction and classification.
 
-- Audio input: WAV, mono or stereo, at least 2 seconds, up to 120 seconds.
-- Resampling: 16 kHz mono.
-- Features: MFCCs and deltas, spectral centroid/bandwidth/rolloff/flatness, RMS, zero-crossing rate, pitch statistics, silence fraction and duration.
-- Models: RBF-SVM (deployment candidate), Logistic Regression, Random Forest, Extra Trees.
-- Validation: StratifiedGroupKFold, grouped by participant. Recordings from a participant cannot be split across training and test folds.
+### UCI Parkinson Dataset with Replicated Acoustic Features
+- Source: https://doi.org/10.24432/C5701F
+- Contains 240 observations from 80 participants.
+- Used for exploratory acoustic feature analysis and visualization.
 
-## Important limitations
+The datasets are publicly available research resources and were not collected by the NeuroMargin team. Please consult their original licences and access conditions.
 
-This cannot reliably diagnose Parkinson's disease. The MDVR-KCL dataset has only 37 participants and its recordings are English speech from a particular acquisition context. A model trained on this cohort may not generalize to arbitrary languages, microphones, ages, accents, environments, sustained vowels, short clips or unrelated audio. The displayed class and probability are experimental model outputs, not clinical probabilities. Do not use them for medical decisions.
+## 4. Technology Stack
 
-A universal classifier for any audio sample cannot be guaranteed from a small corpus. The model requires speech that is reasonably similar to its training data. For scientifically stronger results, validate externally on independent, demographically diverse cohorts and use clinician-reviewed labels.
+- Python
+- NumPy and Pandas
+- Librosa and SoundFile
+- Scikit-learn
+- Matplotlib and Plotly
+- Streamlit
+- Joblib
 
-## Retraining
+## 5. Machine-Learning Models
 
-Delete `models/voice_model.joblib` and run `START_NEUROMARGIN.bat` again. Or activate `.venv` and run `python scripts/train.py`.
+The project evaluates:
 
-## Citation
+1. RBF Support Vector Machine
+2. Logistic Regression
+3. Random Forest
+4. Extra Trees
 
-Jaeger, H., Trivedi, D., & Stadtschnitzer, M. (2019). *Mobile Device Voice Recordings at King's College London (MDVR-KCL) from both early and advanced Parkinson's disease patients and healthy controls*. Zenodo. https://doi.org/10.5281/zenodo.2867216
+The conventional classifiers are implemented using Scikit-learn.
 
-Also retain the original UCI-489 dataset in `data/raw/` if you want to compare the earlier acoustic-feature experiments; it is not used to train the WAV classifier.
+## 6. Audio Feature Extraction
 
+The WAV processing pipeline includes:
 
-## Additional UCI-489 feature analysis
-The bundled UCI-489 CSV is analyzed separately to produce feature variance, feature correlation, PCA, parameter boxplots and participant-grouped model metrics under `results/uci489/`. These tabular-feature results are **not** used to train the WAV classifier; the WAV classifier is trained only on MDVR-KCL raw WAVs so training and inference share the same feature extractor.
+- Stereo-to-mono conversion
+- Resampling to 16 kHz
+- Mel-frequency cepstral coefficients (MFCCs)
+- Delta and delta-delta features
+- RMS energy
+- Zero-crossing rate
+- Spectral centroid, bandwidth, rolloff and flatness
+- Fundamental frequency statistics
 
-## Fast relaunch behavior (incremental setup)
+## 7. Validation and Evaluation
 
-Use `START_NEUROMARGIN.bat` for both first launch and later launches.
+The training workflow uses participant-disjoint stratified group cross-validation to reduce data leakage between recordings belonging to the same participant.
 
-- **First launch:** creates `.venv`, installs requirements, downloads/verifies and extracts MDVR-KCL if it is not already present, generates the UCI-489 analysis, trains the voice model, then opens Streamlit. The dataset download and first training can take substantial time.
-- **Later launches:** reuses the virtual environment, cached dataset, analysis outputs, and trained model. It skips pip installation, dataset preparation, UCI analysis, audio feature extraction, and model training when their tracked inputs have not changed; it goes straight to Streamlit.
-- If `requirements.txt`, the analysis script/input CSV, or model training/audio pipeline code changes, only the affected stage is rerun.
-- Run `FORCE_RETRAIN.bat` when you deliberately want to retrain the voice model with the already-prepared dataset.
-- `.setup` contains cache fingerprints. If you manually replace or edit the extracted WAV dataset, delete `.setup\mdvr_kcl_ready.json` and `.setup\voice_model.json` before launching so the dataset manifest and model are rebuilt.
+Evaluation metrics include:
 
-The fast path assumes the extracted research dataset is unchanged after preparation. It deliberately avoids rescanning hundreds of WAV files on every launch.
+- Accuracy
+- Balanced accuracy
+- Precision
+- Sensitivity
+- Specificity
+- F1-score
+- Matthews correlation coefficient
+- ROC-AUC
+
+## 8. Project Structure
+
+```text
+NeuroMargin/
+├── app.py
+├── requirements.txt
+├── START_NEUROMARGIN.bat
+├── FORCE_RETRAIN.bat
+├── src/
+│   └── neuromargin/
+├── scripts/
+├── data/
+│   └── README.md
+├── docs/
+├── results/
+└── tests/
+```
+
+## 9. Installation and Execution
+
+1. Clone or download this repository.
+2. Obtain the datasets using the instructions in `data/README.md`.
+3. Ensure Python 3.13 is installed.
+4. Run `START_NEUROMARGIN.bat`.
+5. Allow the initial dependency installation and dataset preparation to complete.
+6. Open the Streamlit dashboard in your browser when launched.
+
+The launcher reuses the local environment, prepared dataset and trained model when their inputs have not changed.
+
+## 10. Experimental Limitations
+
+- The available datasets have limited participant diversity.
+- Microphone quality and recording environments may affect acoustic features.
+- Results may not generalize to other languages, accents or populations.
+- Participant-disjoint validation does not replace independent external validation.
+- Model predictions are experimental and must not be interpreted as medical diagnoses.
+
+## 11. Team
+
+**Soham**  
+**Karen**
+
+Both members contributed to the research and development of NeuroMargin. Refer to `docs/CONTRIBUTIONS.md` for the detailed contribution statement.
+
+## 12. References
+
+1. MDVR-KCL Dataset: https://doi.org/10.5281/zenodo.2867216
+2. UCI Parkinson Dataset with Replicated Acoustic Features: https://doi.org/10.24432/C5701F
+3. Cortes, C., and Vapnik, V. (1995). Support-vector networks. *Machine Learning*, 20, 273–297.
+4. Pedregosa, F., et al. (2011). Scikit-learn: Machine learning in Python. *Journal of Machine Learning Research*, 12, 2825–2830.
+5. McFee, B., et al. (2015). librosa: Audio and music signal analysis in Python. *Proceedings of the 14th Python in Science Conference*.
+
+---
+
+**Repository:** NeuroMargin  
+**Project Type:** Academic Research Prototype
